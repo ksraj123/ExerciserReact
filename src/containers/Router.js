@@ -1,5 +1,6 @@
 import React from "react";
 import { Switch, Route, withRouter } from "react-router-dom";
+import useDimensions from "react-use-dimensions";
 
 import ExerciseList from "./ExerciseList";
 import Scores from "./Scores/Scores"
@@ -24,12 +25,26 @@ import '../css/index.css';
 import NewExerciseTemplate from "./Builders/Template";
 import PresenceScores from "./Scores/PresenceScores";
 
-const Main = props => {
+const Main = (props) => {
+	const [ref, containerSize] = useDimensions();
+
+	let zoom = 1;
+	if (props.inFullscreenMode){
+		let boardSize = containerSize.height + (props.inFullscreenMode?55:0);
+		const paddingPercent = 3;
+		zoom = (boardSize/containerSize.height) + paddingPercent/100;
+	}
+	// zoom = `${zoom}%`;
 
 	const { onUpdate, onSharedResult, inEditMode } = props;
+	const mainContainerStyle = {
+		transform: `scale(${zoom})`, 
+		width: `${props.inFullscreenMode? 100/zoom : 100}%`,
+		transformOrigin: "left center"
+	};
 
 	return (
-		<div className="main-container">
+		<div className="main-container" ref={ref} style={mainContainerStyle}>
 			<Switch>
 				<Route exact path="/" render={props => <ExerciseList onUpdate={onUpdate} inEditMode={inEditMode} {...props} />} />
 				<Route exact path="/new" render={props => <NewExerciseTemplate {...props} />} />
